@@ -1,0 +1,14 @@
+:root {
+  --primary: #4F46E5;
+  --primary-dark: #4338CA;
+  --secondary: #10B981;
+  --dark: #1F2937;
+  --gray: #6B7280;
+  --light-gray: #F3F4F6;
+  --white: #FFFFFF;
+}
+
+#root {
+  max-width: 100%;
+  margin: 0 auto;
+}

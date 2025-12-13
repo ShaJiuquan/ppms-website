@@ -1,0 +1,217 @@
+.download-page {
+  min-height: 100vh;
+  background: var(--light-gray);
+}
+
+.download-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 5% 3rem;
+}
+
+.download-container h1 {
+  text-align: center;
+  font-size: 3rem;
+  color: var(--dark);
+  margin-bottom: 1rem;
+}
+
+.download-subtitle {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--gray);
+  margin-bottom: 3rem;
+}
+
+.download-subtitle span {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Download Grid */
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.download-card {
+  background: var(--white);
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.download-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.os-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.download-card h2 {
+  font-size: 1.8rem;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+}
+
+.download-card p {
+  color: var(--gray);
+  margin-bottom: 2rem;
+}
+
+.btn-download {
+  display: inline-block;
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--primary);
+  color: var(--white);
+  border-radius: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.btn-download:not(:disabled):hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+}
+
+.btn-download:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file-size {
+  display: block;
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.install-note {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--light-gray);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--gray);
+  text-align: left;
+  line-height: 1.5;
+}
+
+/* Requirements Section */
+.requirements {
+  background: var(--white);
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 3rem;
+}
+
+.requirements h3 {
+  font-size: 2rem;
+  color: var(--dark);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.requirements-grid h4 {
+  font-size: 1.3rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.requirements-grid ul {
+  list-style: none;
+}
+
+.requirements-grid li {
+  padding: 0.5rem 0;
+  color: var(--gray);
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.requirements-grid li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--secondary);
+  font-weight: bold;
+}
+
+/* Release Notes */
+.release-notes {
+  background: var(--white);
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 3rem;
+}
+
+.release-notes h3 {
+  font-size: 2rem;
+  color: var(--dark);
+  margin-bottom: 1.5rem;
+}
+
+.release-body {
+  color: var(--gray);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* GitHub Link */
+.github-link {
+  text-align: center;
+  padding: 2rem;
+  background: var(--white);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.github-link p {
+  color: var(--gray);
+  font-size: 1.1rem;
+}
+
+.github-link a {
+  color: var(--primary);
+  font-weight: 600;
+  margin-left: 0.5rem;
+  text-decoration: underline;
+}
+
+.github-link a:hover {
+  color: var(--primary-dark);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .download-container h1 {
+    font-size: 2rem;
+  }
+
+  .download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .requirements-grid {
+    grid-template-columns: 1fr;
+  }
+}
