@@ -2,20 +2,38 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Download.css'
 
-function Download() {
+interface Asset {
+  name: string
+  browser_download_url: string
+  size: number
+}
+
+interface Release {
+  tag_name: string
+  body: string
+  assets: Asset[]
+}
+
+interface DownloadLinks {
+  mac?: Asset
+  windows?: Asset
+  linux?: Asset
+}
+
+const Download: React.FC = () => {
   const navigate = useNavigate()
-  const [latestRelease, setLatestRelease] = useState(null)
+  const [latestRelease, setLatestRelease] = useState<Release | null>(null)
 
   useEffect(() => {
     // 获取最新 Release
     fetch('https://api.github.com/repos/ShaJiuquan/ppms_newVersion_1.0/releases/latest')
       .then(res => res.json())
-      .then(data => setLatestRelease(data))
+      .then((data: Release) => setLatestRelease(data))
       .catch(err => console.error('获取 Release 失败:', err))
   }, [])
 
-  const getDownloadLinks = () => {
-    if (!latestRelease || !latestRelease.assets) return []
+  const getDownloadLinks = (): DownloadLinks => {
+    if (!latestRelease || !latestRelease.assets) return {}
 
     return {
       mac: latestRelease.assets.find(a => a.name.includes('.dmg')),
