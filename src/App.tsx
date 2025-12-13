@@ -4,7 +4,7 @@ import Home from './pages/Home'
 import Download from './pages/Download'
 import './App.css'
 
-const App: React.FC = () => {
+function App() {
   return (
     <Router basename="/ppms-website">
       <Routes>

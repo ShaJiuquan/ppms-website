@@ -20,7 +20,7 @@ interface DownloadLinks {
   linux?: Asset
 }
 
-const Download: React.FC = () => {
+function Download() {
   const navigate = useNavigate()
   const [latestRelease, setLatestRelease] = useState<Release | null>(null)
 
