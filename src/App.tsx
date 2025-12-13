@@ -1,8 +1,8 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import Download from './pages/Download'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Download from './pages/Download';
+import './App.css';
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         <Route path="/download" element={<Download />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;
