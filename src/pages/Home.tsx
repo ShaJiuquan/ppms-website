@@ -1,15 +1,9 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Home.css'
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
-  const productCarouselRef = useRef<HTMLDivElement | null>(null)
-
-  const scrollProducts = (distance: number) => {
-    if (!productCarouselRef.current) return
-    productCarouselRef.current.scrollBy({ left: distance, behavior: 'smooth' })
-  }
 
   return (
     <div className="home">
@@ -48,77 +42,77 @@ const Home: React.FC = () => {
       <section id="products" className="features">
         <h2 className="section-title">产品服务</h2>
         <p className="section-subtitle">为科研与工业提供全方位的物理测量解决方案</p>
-        <div className="carousel-shell">
-          <div className="carousel-controls">
-            <button onClick={() => scrollProducts(-420)} aria-label="上一组" className="carousel-btn">‹</button>
-            <button onClick={() => scrollProducts(420)} aria-label="下一组" className="carousel-btn">›</button>
+        <div className="features-grid products-grid">
+          <div className="feature-card premium">
+            <div className="card-accent" />
+            <div className="card-badge">旗舰</div>
+            <h3>PPMS 控制系统</h3>
+            <p className="card-desc">新一代物性测量软件，适配低温、磁场等复杂实验环境。</p>
+            <ul className="card-list">
+              <li>多通道同步控制，毫秒级时序</li>
+              <li>安全联锁与异常自愈</li>
+              <li>可视化流程编排</li>
+            </ul>
           </div>
-          <div className="product-carousel" ref={productCarouselRef}>
-            <div className="feature-card premium">
-              <div className="card-badge">旗舰</div>
-              <h3>PPMS 控制系统</h3>
-              <p className="card-desc">新一代物性测量软件，深度适配低温、磁场等复杂实验环境</p>
-              <ul className="card-list">
-                <li>多通道同步控制，毫秒级时序精度</li>
-                <li>安全联锁与异常自愈，保障实验连续性</li>
-                <li>可视化流程编排，降低实验上手成本</li>
-              </ul>
-            </div>
 
-            <div className="feature-card premium">
-              <div className="card-badge">分析</div>
-              <h3>数据分析平台</h3>
-              <p className="card-desc">实时采集、在线拟合与多维可视化，让数据价值即时呈现</p>
-              <ul className="card-list">
-                <li>热图 / 线图 / 3D 曲面一键切换</li>
-                <li>批量导出与自动报告生成</li>
-                <li>可插拔算法组件，支持二次开发</li>
-              </ul>
-            </div>
+          <div className="feature-card premium">
+            <div className="card-accent" />
+            <div className="card-badge">分析</div>
+            <h3>数据分析平台</h3>
+            <p className="card-desc">实时采集、多维可视化、在线拟合，让数据价值即时呈现。</p>
+            <ul className="card-list">
+              <li>热图 / 线图 / 3D 曲面</li>
+              <li>自动报告与批量导出</li>
+              <li>可插拔算法组件</li>
+            </ul>
+          </div>
 
-            <div className="feature-card premium">
-              <div className="card-badge">自动化</div>
-              <h3>自动化测试</h3>
-              <p className="card-desc">序列化实验执行，覆盖扫描、循环、条件分支等复杂场景</p>
-              <ul className="card-list">
-                <li>拖拽式序列编辑器与脚本混合模式</li>
-                <li>任务队列与优先级调度，提升设备利用率</li>
-                <li>异常回滚与断点续跑，减少重复实验</li>
-              </ul>
-            </div>
+          <div className="feature-card premium">
+            <div className="card-accent" />
+            <div className="card-badge">自动化</div>
+            <h3>自动化测试</h3>
+            <p className="card-desc">序列化执行覆盖扫描、循环、条件分支，实验更高效。</p>
+            <ul className="card-list">
+              <li>拖拽式序列 + 脚本混合</li>
+              <li>任务队列与优先级调度</li>
+              <li>异常回滚与断点续跑</li>
+            </ul>
+          </div>
 
-            <div className="feature-card premium">
-              <div className="card-badge">云端</div>
-              <h3>云端管理</h3>
-              <p className="card-desc">全生命周期的数据与配置托管，多端同步，团队协同更轻松</p>
-              <ul className="card-list">
-                <li>加密存储与分级权限控制</li>
-                <li>团队项目空间与操作审计</li>
-                <li>云端备份与版本回溯</li>
-              </ul>
-            </div>
+          <div className="feature-card premium">
+            <div className="card-accent" />
+            <div className="card-badge">云端</div>
+            <h3>云端管理</h3>
+            <p className="card-desc">全生命周期数据与配置托管，多端同步，团队协同轻松。</p>
+            <ul className="card-list">
+              <li>加密存储与分级权限</li>
+              <li>项目空间与操作审计</li>
+              <li>云端备份与版本回溯</li>
+            </ul>
+          </div>
 
-            <div className="feature-card premium">
-              <div className="card-badge">集成</div>
-              <h3>多仪器集成</h3>
-              <p className="card-desc">兼容 Keithley、SR830 等主流仪器，快速接入一站式控制</p>
-              <ul className="card-list">
-                <li>官方与社区驱动库快速加载</li>
-                <li>统一接口协议，减少重复适配</li>
-                <li>状态监测与健康度预警</li>
-              </ul>
-            </div>
+          <div className="feature-card premium">
+            <div className="card-accent" />
+            <div className="card-badge">集成</div>
+            <h3>多仪器集成</h3>
+            <p className="card-desc">兼容主流仪器，统一接口协议，快速接入一站式控制。</p>
+            <ul className="card-list">
+              <li>官方/社区驱动快速加载</li>
+              <li>统一接口减少重复适配</li>
+              <li>状态监测与健康度预警</li>
+            </ul>
+          </div>
 
-            <div className="feature-card premium">
-              <div className="card-badge">定制</div>
-              <h3>定制化服务</h3>
-              <p className="card-desc">针对独特实验需求提供端到端的方案设计与交付</p>
-              <ul className="card-list">
-                <li>专属研发顾问与交付经理</li>
-                <li>现场部署与培训，极速落地</li>
-                <li>长期运维与升级支持</li>
-              </ul>
-            </div>
+          <div className="feature-card premium">
+            <div className="card-accent" />
+            <div className="card-badge">定制</div>
+            <h3>定制化服务</h3>
+            <p className="card-desc">针对独特实验需求提供端到端方案设计与交付。</p>
+            <ul className="card-list">
+              <li>专属顾问与交付经理</li>
+              <li>现场部署与培训</li>
+              <li>长期运维与升级支持</li>
+            </ul>
           </div>
         </div>
       </section>
