@@ -1,55 +1,59 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import './Download.css'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Download.css';
 
 interface Asset {
-  name: string
-  browser_download_url: string
-  size: number
+  name: string;
+  browser_download_url: string;
+  size: number;
 }
 
 interface Release {
-  tag_name: string
-  body: string
-  assets: Asset[]
+  tag_name: string;
+  body: string;
+  assets: Asset[];
 }
 
 interface DownloadLinks {
-  mac?: Asset
-  windows?: Asset
-  linux?: Asset
+  mac?: Asset;
+  windows?: Asset;
+  linux?: Asset;
 }
 
 function Download() {
-  const navigate = useNavigate()
-  const [latestRelease, setLatestRelease] = useState<Release | null>(null)
+  const navigate = useNavigate();
+  const [latestRelease, setLatestRelease] = useState<Release | null>(null);
 
   useEffect(() => {
     // 获取最新 Release
-    fetch('https://api.github.com/repos/ShaJiuquan/ppms_newVersion_1.0/releases/latest')
-      .then(res => res.json())
+    fetch(
+      'https://api.github.com/repos/ShaJiuquan/ppms_newVersion_1.0/releases/latest',
+    )
+      .then((res) => res.json())
       .then((data: Release) => setLatestRelease(data))
-      .catch(err => console.error('获取 Release 失败:', err))
-  }, [])
+      .catch((err) => console.error('获取 Release 失败:', err));
+  }, []);
 
   const getDownloadLinks = (): DownloadLinks => {
-    if (!latestRelease || !latestRelease.assets) return {}
+    if (!latestRelease || !latestRelease.assets) return {};
 
     return {
-      mac: latestRelease.assets.find(a => a.name.includes('.dmg')),
-      windows: latestRelease.assets.find(a => a.name.includes('.exe')),
-      linux: latestRelease.assets.find(a => a.name.includes('.AppImage'))
-    }
-  }
+      mac: latestRelease.assets.find((a) => a.name.includes('.dmg')),
+      windows: latestRelease.assets.find((a) => a.name.includes('.exe')),
+      linux: latestRelease.assets.find((a) => a.name.includes('.AppImage')),
+    };
+  };
 
-  const downloads = getDownloadLinks()
+  const downloads = getDownloadLinks();
 
   return (
     <div className="download-page">
       <nav className="nav">
-        <div className="logo" onClick={() => navigate('/')}>PPMS</div>
+        <div className="logo" onClick={() => navigate('/')}>
+          PPMS
+        </div>
         <div className="nav-links">
-          <button onClick={() => navigate('/')} className="btn-secondary">
+          <button type="button" onClick={() => navigate('/')} className="btn-secondary">
             返回首页
           </button>
         </div>
@@ -80,7 +84,7 @@ function Download() {
                 </span>
               </a>
             ) : (
-              <button className="btn-download" disabled>
+              <button type="button" className="btn-download" disabled>
                 暂无版本
               </button>
             )}
@@ -106,7 +110,7 @@ function Download() {
                 </span>
               </a>
             ) : (
-              <button className="btn-download" disabled>
+              <button type="button" className="btn-download" disabled>
                 暂无版本
               </button>
             )}
@@ -132,7 +136,7 @@ function Download() {
                 </span>
               </a>
             ) : (
-              <button className="btn-download" disabled>
+              <button type="button" className="btn-download" disabled>
                 暂无版本
               </button>
             )}
@@ -177,9 +181,7 @@ function Download() {
         {latestRelease && latestRelease.body && (
           <div className="release-notes">
             <h3>更新日志</h3>
-            <div className="release-body">
-              {latestRelease.body}
-            </div>
+            <div className="release-body">{latestRelease.body}</div>
           </div>
         )}
 
@@ -194,7 +196,7 @@ function Download() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Download
+export default Download;
