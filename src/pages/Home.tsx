@@ -44,39 +44,69 @@ const Home: React.FC = () => {
         <p className="section-subtitle">为科研与工业提供全方位的物理测量解决方案</p>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">🔬</div>
-            <h3>PPMS控制系统</h3>
-            <p>新一代物理性质测量系统软件，支持多种低温、磁场环境下的精密测量</p>
+            <div className="card-badge">旗舰</div>
+            <h3>PPMS 控制系统</h3>
+            <p className="card-desc">新一代物性测量软件，深度适配低温、磁场等复杂实验环境</p>
+            <ul className="card-list">
+              <li>多通道同步控制，毫秒级时序精度</li>
+              <li>安全联锁与异常自愈，保障实验连续性</li>
+              <li>可视化流程编排，降低实验上手成本</li>
+            </ul>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">📊</div>
+            <div className="card-badge">分析</div>
             <h3>数据分析平台</h3>
-            <p>强大的数据采集与分析系统，实时可视化，智能化数据处理</p>
+            <p className="card-desc">实时采集、在线拟合与多维可视化，让数据价值即时呈现</p>
+            <ul className="card-list">
+              <li>热图 / 线图 / 3D 曲面一键切换</li>
+              <li>批量导出与自动报告生成</li>
+              <li>可插拔算法组件，支持二次开发</li>
+            </ul>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">🎯</div>
+            <div className="card-badge">自动化</div>
             <h3>自动化测试</h3>
-            <p>全自动测量流程，支持复杂序列编程，大幅提升实验效率</p>
+            <p className="card-desc">序列化实验执行，覆盖扫描、循环、条件分支等复杂场景</p>
+            <ul className="card-list">
+              <li>拖拽式序列编辑器与脚本混合模式</li>
+              <li>任务队列与优先级调度，提升设备利用率</li>
+              <li>异常回滚与断点续跑，减少重复实验</li>
+            </ul>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">💾</div>
+            <div className="card-badge">云端</div>
             <h3>云端管理</h3>
-            <p>数据云端存储与管理，多终端同步，保障数据安全</p>
+            <p className="card-desc">全生命周期的数据与配置托管，多端同步，团队协同更轻松</p>
+            <ul className="card-list">
+              <li>加密存储与分级权限控制</li>
+              <li>团队项目空间与操作审计</li>
+              <li>云端备份与版本回溯</li>
+            </ul>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">🌡️</div>
+            <div className="card-badge">集成</div>
             <h3>多仪器集成</h3>
-            <p>兼容Keithley、SR830等国际主流仪器，一站式控制方案</p>
+            <p className="card-desc">兼容 Keithley、SR830 等主流仪器，快速接入一站式控制</p>
+            <ul className="card-list">
+              <li>官方与社区驱动库快速加载</li>
+              <li>统一接口协议，减少重复适配</li>
+              <li>状态监测与健康度预警</li>
+            </ul>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">⚙️</div>
+            <div className="card-badge">定制</div>
             <h3>定制化服务</h3>
-            <p>根据客户需求提供专业定制开发与技术支持服务</p>
+            <p className="card-desc">针对独特实验需求提供端到端的方案设计与交付</p>
+            <ul className="card-list">
+              <li>专属研发顾问与交付经理</li>
+              <li>现场部署与培训，极速落地</li>
+              <li>长期运维与升级支持</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -86,29 +116,65 @@ const Home: React.FC = () => {
         <h2 className="section-title">解决方案</h2>
         <p className="section-subtitle">深耕行业应用，服务科研创新</p>
         <div className="tech-grid">
-          <div className="tech-item">
-            <h4>🏫 高校科研</h4>
-            <p>为高校物理、材料实验室提供完整的测量控制解决方案</p>
+          <div className="tech-item card">
+            <div className="card-badge ghost">高校科研</div>
+            <h4>实验室一体化平台</h4>
+            <p>覆盖低温、磁场、输运等多物理量测量，助力高水平论文产出</p>
+            <div className="pill-row">
+              <span className="pill">流程模板</span>
+              <span className="pill">数据留痕</span>
+              <span className="pill">权限管理</span>
+            </div>
           </div>
-          <div className="tech-item">
-            <h4>🏭 工业应用</h4>
-            <p>半导体、新能源材料性能测试与质量控制系统</p>
+          <div className="tech-item card">
+            <div className="card-badge ghost">工业应用</div>
+            <h4>质量与可靠性测试</h4>
+            <p>半导体、新能源材料的量化测试与产线质控，助力产品迭代</p>
+            <div className="pill-row">
+              <span className="pill">SPC/QC</span>
+              <span className="pill">批量报告</span>
+              <span className="pill">设备联动</span>
+            </div>
           </div>
-          <div className="tech-item">
-            <h4>🔬 科研院所</h4>
-            <p>支持前沿科学研究的高精度测量平台</p>
+          <div className="tech-item card">
+            <div className="card-badge ghost">科研院所</div>
+            <h4>高精度测量基座</h4>
+            <p>满足前沿研究的高分辨率与高稳定性测量需求，保障实验可重复</p>
+            <div className="pill-row">
+              <span className="pill">纳伏级噪声</span>
+              <span className="pill">长时漂移补偿</span>
+              <span className="pill">异常自检</span>
+            </div>
           </div>
-          <div className="tech-item">
-            <h4>🧪 材料研发</h4>
-            <p>新材料物性表征与分析一体化解决方案</p>
+          <div className="tech-item card">
+            <div className="card-badge ghost">材料研发</div>
+            <h4>物性表征加速</h4>
+            <p>从制样到测量的全链路数据闭环，加速材料筛选与验证</p>
+            <div className="pill-row">
+              <span className="pill">参数扫描</span>
+              <span className="pill">模型拟合</span>
+              <span className="pill">数据版本</span>
+            </div>
           </div>
-          <div className="tech-item">
-            <h4>⚡ 能源领域</h4>
-            <p>电池、超导等能源材料测试系统</p>
+          <div className="tech-item card">
+            <div className="card-badge ghost">能源领域</div>
+            <h4>电化学与超导</h4>
+            <p>电池、超导等能源材料的性能测试与寿命评估，支持定制工况</p>
+            <div className="pill-row">
+              <span className="pill">循环老化</span>
+              <span className="pill">温控联动</span>
+              <span className="pill">云端对比</span>
+            </div>
           </div>
-          <div className="tech-item">
-            <h4>💎 量子科技</h4>
-            <p>量子材料、低温物理测量技术支持</p>
+          <div className="tech-item card">
+            <div className="card-badge ghost">量子科技</div>
+            <h4>低温量子测量</h4>
+            <p>为量子材料与器件提供低温、强磁、高稳定的测量支持</p>
+            <div className="pill-row">
+              <span className="pill">超低噪声</span>
+              <span className="pill">时序同步</span>
+              <span className="pill">脚本化</span>
+            </div>
           </div>
         </div>
       </section>
