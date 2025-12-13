@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/ppms_newVersion_1.0/',
+  base: '/ppms-website/',
   build: {
     outDir: 'dist'
   }
