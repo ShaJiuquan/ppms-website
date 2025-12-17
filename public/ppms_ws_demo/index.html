@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PPMS WS Demo (JSON-RPC 2.0)</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --panel: #ffffff;
+        --border: #e4e7ec;
+        --text: #101828;
+        --muted: #667085;
+        --accent: #f79009;
+        --accent-weak: rgba(247, 144, 9, 0.12);
+        --good: #12b76a;
+        --bad: #f04438;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+      }
+      .title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .title h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 650;
+      }
+      .title .sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 440px 1fr;
+        gap: 14px;
+        padding: 14px;
+        height: calc(100% - 62px);
+      }
+
+      .left {
+        overflow: auto;
+        padding-bottom: 10px;
+      }
+
+      .right {
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 14px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      .cardHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .cardTitle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 650;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--muted);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d0d5dd;
+      }
+      .badge.ok .dot { background: var(--good); }
+      .badge.bad .dot { background: var(--bad); }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      input[type="text"], select, textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: #fff;
+        color: var(--text);
+        outline: none;
+      }
+      textarea { min-height: 140px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+
+      .btnRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      button {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.primary {
+        border-color: rgba(247, 144, 9, 0.35);
+        background: var(--accent-weak);
+      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      .muted { color: var(--muted); font-size: 12px; }
+      .hint { background: #fff; border: 1px dashed rgba(247, 144, 9, 0.45); padding: 10px; border-radius: 12px; }
+
+      .logWrap {
+        height: 100%;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+      }
+
+      .log {
+        width: 100%;
+        height: 100%;
+        min-height: 280px;
+      }
+
+      code {
+        background: rgba(16, 24, 40, 0.06);
+        padding: 1px 6px;
+        border-radius: 8px;
+      }
+
+      @media (max-width: 1040px) {
+        .app { grid-template-columns: 1fr; height: auto; }
+        .right { grid-template-rows: auto auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="title">
+        <h1>PPMS WS Demo</h1>
+        <div class="sub">Single-page JSON-RPC 2.0 tester (Autocube-like layout)</div>
+      </div>
+      <div class="badge" id="connBadge"><span class="dot"></span><span id="connState">DISCONNECTED</span></div>
+    </div>
+
+    <div class="app">
+      <div class="left">
+        <div class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">Connection</div>
+            <div class="muted">Server: <span id="serverState">(unknown)</span></div>
+          </div>
+          <div class="row">
+            <label>
+              WS URL
+              <input id="wsUrl" type="text" value="ws://127.0.0.1:8765" />
+            </label>
+            <div class="btnRow">
+              <button id="btnConnect" class="primary">Connect</button>
+              <button id="btnDisconnect" disabled>Disconnect</button>
+              <button id="btnPing" disabled>ping</button>
+              <button id="btnHello" disabled>hello</button>
+            </div>
+            <div class="hint muted">
+              Notifications arrive as JSON-RPC (no <code>id</code>). Most instrument calls are blocking IO bridged via
+              <code>asyncio.to_thread</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">Controlled Runner</div>
+            <div class="muted">MVP simulates progress</div>
+          </div>
+          <div class="row">
+            <div class="grid2">
+              <label>
+                mode
+                <select id="mode">
+                  <option value="dry_run" selected>dry_run</option>
+                  <option value="run">run</option>
+                </select>
+              </label>
+              <label>
+                script
+                <input id="script" type="text" value="SCAN_TEMP 1.8; WAIT_STABLE 60; MEASURE_RES" />
+              </label>
+            </div>
+            <div class="btnRow">
+              <button id="btnRun" class="primary" disabled>run_script</button>
+              <button id="btnPause" disabled>pause</button>
+              <button id="btnResume" disabled>resume</button>
+              <button id="btnAbort" disabled>abort</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">Environment</div>
+            <div class="muted">Temperature / Field / Angles</div>
+          </div>
+
+          <div class="row">
+            <div class="grid2">
+              <label>target_k <input id="tempTargetK" type="text" value="1.8" /></label>
+              <label>rate_k_per_min (optional) <input id="tempRate" type="text" value="" /></label>
+            </div>
+            <div class="btnRow">
+              <button id="btnTempSet" disabled>temperature.set</button>
+              <button id="btnTempGet" disabled>temperature.get</button>
+            </div>
+
+            <div class="grid2">
+              <label>tol_k <input id="tempTol" type="text" value="0.01" /></label>
+              <label>dur_s <input id="tempDur" type="text" value="60" /></label>
+            </div>
+            <div class="btnRow">
+              <button id="btnTempWait" disabled>temperature.wait_stable</button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:10px 0;" />
+
+            <div class="grid2">
+              <label>target_t <input id="fieldTargetT" type="text" value="1.0" /></label>
+              <label>ramp_t_per_s (optional) <input id="fieldRamp" type="text" value="" /></label>
+            </div>
+            <div class="btnRow">
+              <button id="btnFieldSet" disabled>field.set</button>
+              <button id="btnFieldGet" disabled>field.get</button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:10px 0;" />
+
+            <div class="grid2">
+              <label>theta (deg) <input id="thetaDeg" type="text" value="10" /></label>
+              <label>phi (deg) <input id="phiDeg" type="text" value="20" /></label>
+            </div>
+            <div class="btnRow">
+              <button id="btnThetaSet" disabled>angle.theta.set</button>
+              <button id="btnThetaGet" disabled>angle.theta.get</button>
+              <button id="btnPhiSet" disabled>angle.phi.set</button>
+              <button id="btnPhiGet" disabled>angle.phi.get</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">Instruments</div>
+            <div class="muted">Keithley / SR830 / 3706</div>
+          </div>
+
+          <div class="row">
+            <div class="muted" style="font-weight:650;color:var(--text);">Keithley 2450</div>
+            <div class="grid2">
+              <label>
+                mode
+                <select id="k2450Mode">
+                  <option value="current" selected>current</option>
+                  <option value="voltage">voltage</option>
+                </select>
+              </label>
+              <label>level <input id="k2450Level" type="text" value="0.001" /></label>
+            </div>
+            <div class="grid2">
+              <label>what <input id="k2450What" type="text" value="iv" /></label>
+              <div></div>
+            </div>
+            <div class="btnRow">
+              <button id="btnK2450SetSource" disabled>keithley2450.set_source</button>
+              <button id="btnK2450Measure" disabled>keithley2450.measure</button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:10px 0;" />
+
+            <div class="muted" style="font-weight:650;color:var(--text);">Keithley 6221 / 2182</div>
+            <div class="grid2">
+              <label>current_a <input id="k6221Current" type="text" value="0.001" /></label>
+              <label>width_s <input id="k6221Width" type="text" value="0.01" /></label>
+            </div>
+            <div class="btnRow">
+              <button id="btnK6221SetCurrent" disabled>keithley6221.set_current</button>
+              <button id="btnK6221Pulse" disabled>keithley6221.pulse_current</button>
+              <button id="btnK2182ReadV" disabled>keithley2182.read_voltage</button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:10px 0;" />
+
+            <div class="muted" style="font-weight:650;color:var(--text);">Keithley 6514</div>
+            <div class="grid2">
+              <label>
+                func
+                <select id="k6514Func">
+                  <option value="current" selected>current</option>
+                  <option value="voltage">voltage</option>
+                  <option value="resistance">resistance</option>
+                  <option value="charge">charge</option>
+                </select>
+              </label>
+              <div></div>
+            </div>
+            <div class="btnRow">
+              <button id="btnK6514Idn" disabled>keithley6514.idn</button>
+              <button id="btnK6514Refresh" disabled>keithley6514.refresh_status</button>
+              <button id="btnK6514Read" disabled>keithley6514.read_measurement</button>
+              <button id="btnK6514SetFunc" disabled>keithley6514.set_function</button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:10px 0;" />
+
+            <div class="muted" style="font-weight:650;color:var(--text);">SR830</div>
+            <div class="grid2">
+              <label>
+                reference source
+                <select id="sr830RefSource">
+                  <option value="internal" selected>internal</option>
+                  <option value="external">external</option>
+                </select>
+              </label>
+              <label>frequency (Hz) <input id="sr830Frequency" type="text" value="1000" /></label>
+            </div>
+            <div class="grid2">
+              <label>phase (deg) <input id="sr830Phase" type="text" value="0" /></label>
+              <label>harmonic <input id="sr830Harmonic" type="text" value="1" /></label>
+            </div>
+            <div class="grid2">
+              <label>amplitude (V) <input id="sr830Amplitude" type="text" value="0.1" /></label>
+              <div></div>
+            </div>
+            <div class="btnRow">
+              <button id="btnSr830Idn" disabled>sr830.idn</button>
+              <button id="btnSr830Refresh" disabled>sr830.refresh_status</button>
+              <button id="btnSr830Read" disabled>sr830.read_output</button>
+              <button id="btnSr830ConfigureRef" class="primary" disabled>sr830.configure_ref</button>
+            </div>
+
+            <div class="grid2" style="margin-top: 8px;">
+              <label>
+                input config
+                <select id="sr830InputConfig">
+                  <option value="a" selected>a</option>
+                  <option value="a-b">a-b</option>
+                  <option value="i-1m">i-1m</option>
+                  <option value="i-100m">i-100m</option>
+                </select>
+              </label>
+              <label>time constant (s) <input id="sr830TimeConstant" type="text" value="0.3" /></label>
+            </div>
+            <div class="btnRow">
+              <button id="btnSr830SetInputConfig" disabled>sr830.set_input_config</button>
+              <button id="btnSr830SetTimeConstant" disabled>sr830.set_time_constant</button>
+            </div>
+
+            <div class="grid2" style="margin-top: 8px;">
+              <label>
+                filter slope (dB/oct)
+                <select id="sr830FilterSlope">
+                  <option value="6">6</option>
+                  <option value="12" selected>12</option>
+                  <option value="18">18</option>
+                  <option value="24">24</option>
+                </select>
+              </label>
+              <label>
+                reserve mode
+                <select id="sr830ReserveMode">
+                  <option value="high">high</option>
+                  <option value="normal" selected>normal</option>
+                  <option value="low-noise">low-noise</option>
+                </select>
+              </label>
+            </div>
+            <div class="btnRow">
+              <button id="btnSr830SetFilterSlope" disabled>sr830.set_filter_slope</button>
+              <button id="btnSr830SetReserveMode" disabled>sr830.set_reserve_mode</button>
+            </div>
+
+            <div class="grid2" style="margin-top: 8px;">
+              <label>
+                notch filter
+                <select id="sr830NotchFilter">
+                  <option value="off" selected>off</option>
+                  <option value="line">line</option>
+                  <option value="2x-line">2x-line</option>
+                  <option value="both">both</option>
+                </select>
+              </label>
+              <label>
+                sync filter
+                <select id="sr830SyncFilter">
+                  <option value="off" selected>off</option>
+                  <option value="on">on</option>
+                </select>
+              </label>
+            </div>
+            <div class="btnRow">
+              <button id="btnSr830SetNotchFilter" disabled>sr830.set_notch_filter</button>
+              <button id="btnSr830SetSyncFilter" disabled>sr830.set_sync_filter</button>
+            </div>
+
+            <div class="grid2" style="margin-top: 8px;">
+              <label>sensitivity (V) <input id="sr830Sensitivity" type="text" value="0.002" /></label>
+              <label>
+                input grounding
+                <select id="sr830InputGrounding">
+                  <option value="float" selected>float</option>
+                  <option value="ground">ground</option>
+                </select>
+              </label>
+            </div>
+            <div class="grid2">
+              <label>
+                input coupling
+                <select id="sr830InputCoupling">
+                  <option value="DC" selected>DC</option>
+                  <option value="AC">AC</option>
+                </select>
+              </label>
+              <div></div>
+            </div>
+            <div class="btnRow">
+              <button id="btnSr830SetSensitivity" disabled>sr830.set_sensitivity</button>
+              <button id="btnSr830SetInputGrounding" disabled>sr830.set_input_grounding</button>
+              <button id="btnSr830SetInputCoupling" disabled>sr830.set_input_coupling</button>
+            </div>
+
+            <div class="grid2" style="margin-top: 8px;">
+              <label>
+                CH1 display
+                <select id="sr830Ch1Display">
+                  <option value="X" selected>X</option>
+                  <option value="Y">Y</option>
+                  <option value="R">R</option>
+                  <option value="Phase">Phase</option>
+                </select>
+              </label>
+              <label>
+                CH2 display
+                <select id="sr830Ch2Display">
+                  <option value="Y" selected>Y</option>
+                  <option value="X">X</option>
+                  <option value="R">R</option>
+                  <option value="Phase">Phase</option>
+                </select>
+              </label>
+            </div>
+            <div class="btnRow">
+              <button id="btnSr830SetChannelDisplays" disabled>sr830.set_channel_displays</button>
+              <button id="btnSr830AutoGain" disabled>sr830.auto_gain</button>
+              <button id="btnSr830AutoReserve" disabled>sr830.auto_reserve</button>
+              <button id="btnSr830AutoPhase" disabled>sr830.auto_phase</button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:10px 0;" />
+
+            <div class="muted" style="font-weight:650;color:var(--text);">Keithley 3706</div>
+            <div class="grid2">
+              <label>channelList <input id="k3706ChannelList" type="text" value="1101:1616" /></label>
+              <label>specifier <input id="k3706Specifier" type="text" value="1101:1616" /></label>
+            </div>
+            <label>
+              scriptContent
+              <textarea id="k3706Script" placeholder="-- lua script content\nprint('hello')"></textarea>
+            </label>
+            <div class="btnRow">
+              <button id="btnK3706Idn" disabled>keithley3706.idn</button>
+              <button id="btnK3706Refresh" disabled>keithley3706.refresh_status</button>
+              <button id="btnK3706Open" disabled>keithley3706.open_channel</button>
+              <button id="btnK3706Close" disabled>keithley3706.close_channel</button>
+              <button id="btnK3706GetClosed" disabled>keithley3706.get_closed</button>
+              <button id="btnK3706GetCards" disabled>keithley3706.get_switch_cards</button>
+              <button id="btnK3706GetAll" disabled>keithley3706.get_all_channels</button>
+              <button id="btnK3706LoadScript" disabled>keithley3706.load_script</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">Custom JSON-RPC Call</div>
+            <div class="muted">Method + params (JSON)</div>
+          </div>
+          <div class="row">
+            <div class="grid2">
+              <label>
+                method
+                <input id="rpcMethod" type="text" value="temperature.get" />
+              </label>
+              <label>
+                timeout (ms)
+                <input id="rpcTimeout" type="text" value="8000" />
+              </label>
+            </div>
+            <label>
+              params (JSON)
+              <textarea id="rpcParams">{}</textarea>
+            </label>
+            <div class="btnRow">
+              <button id="btnRpcSend" class="primary" disabled>Send</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card logWrap">
+          <div class="cardHeader">
+            <div class="cardTitle">Log</div>
+            <div class="btnRow">
+              <button id="btnClear">Clear</button>
+            </div>
+          </div>
+          <textarea class="log" id="log" spellcheck="false" readonly></textarea>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /** @type {WebSocket | null} */
+      let ws = null;
+      let nextId = 1;
+      /** @type {Map<number, {resolve: Function, reject: Function, timeout: any}>} */
+      const pending = new Map();
+
+      const $ = (id) => document.getElementById(id);
+
+      function setConnState(state) {
+        $("connState").textContent = state;
+        const badge = $("connBadge");
+        badge.classList.remove("ok", "bad");
+        if (state === "CONNECTED") badge.classList.add("ok");
+        if (state === "ERROR") badge.classList.add("bad");
+      }
+
+      function setButtonsEnabled(connected) {
+        $("btnConnect").disabled = connected;
+        $("btnDisconnect").disabled = !connected;
+        for (const id of [
+          "btnPing",
+          "btnHello",
+          "btnRun",
+          "btnPause",
+          "btnResume",
+          "btnAbort",
+          "btnRpcSend",
+          "btnTempSet",
+          "btnTempGet",
+          "btnTempWait",
+          "btnFieldSet",
+          "btnFieldGet",
+          "btnThetaSet",
+          "btnThetaGet",
+          "btnPhiSet",
+          "btnPhiGet",
+          "btnK2450SetSource",
+          "btnK2450Measure",
+          "btnK6221SetCurrent",
+          "btnK6221Pulse",
+          "btnK2182ReadV",
+          "btnK6514Idn",
+          "btnK6514Refresh",
+          "btnK6514Read",
+          "btnK6514SetFunc",
+          "btnSr830Idn",
+          "btnSr830Refresh",
+          "btnSr830Read",
+          "btnSr830ConfigureRef",
+          "btnSr830SetInputConfig",
+          "btnSr830SetTimeConstant",
+          "btnSr830SetFilterSlope",
+          "btnSr830SetReserveMode",
+          "btnSr830SetNotchFilter",
+          "btnSr830SetSyncFilter",
+          "btnSr830SetSensitivity",
+          "btnSr830SetInputGrounding",
+          "btnSr830SetInputCoupling",
+          "btnSr830SetChannelDisplays",
+          "btnSr830AutoGain",
+          "btnSr830AutoReserve",
+          "btnSr830AutoPhase",
+          "btnK3706Idn",
+          "btnK3706Refresh",
+          "btnK3706Open",
+          "btnK3706Close",
+          "btnK3706GetClosed",
+          "btnK3706GetCards",
+          "btnK3706GetAll",
+          "btnK3706LoadScript",
+        ]) {
+          $(id).disabled = !connected;
+        }
+      }
+
+      function logLine(line) {
+        const ta = $("log");
+        ta.value += line + "\n";
+        ta.scrollTop = ta.scrollHeight;
+      }
+
+      function safeJsonParse(raw) {
+        try { return JSON.parse(raw); } catch { return null; }
+      }
+
+      function sendRpc(method, params = {}, timeoutMs) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+          return Promise.reject(new Error("WebSocket not connected"));
+        }
+
+        const id = nextId++;
+        const msg = { jsonrpc: "2.0", id, method, params };
+        ws.send(JSON.stringify(msg));
+
+        return new Promise((resolve, reject) => {
+          const ms = typeof timeoutMs === "number" && timeoutMs > 0 ? timeoutMs : 8000;
+          const timeout = setTimeout(() => {
+            pending.delete(id);
+            reject(new Error(`RPC timeout: ${method}`));
+          }, ms);
+          pending.set(id, { resolve, reject, timeout });
+        });
+      }
+
+      function handleIncoming(raw) {
+        const msg = safeJsonParse(raw);
+        if (!msg) {
+          logLine(`[rx] (invalid JSON) ${raw}`);
+          return;
+        }
+
+        // Response
+        if (Object.prototype.hasOwnProperty.call(msg, "id") && (msg.result !== undefined || msg.error !== undefined)) {
+          const entry = pending.get(msg.id);
+          if (entry) {
+            clearTimeout(entry.timeout);
+            pending.delete(msg.id);
+            if (msg.error) entry.reject(msg.error);
+            else entry.resolve(msg.result);
+          }
+          logLine(`[rx:response] ${JSON.stringify(msg)}`);
+          return;
+        }
+
+        // Notification
+        if (msg.method) {
+          logLine(`[rx:notify] ${JSON.stringify(msg)}`);
+          if (msg.method === "status" && msg.params && msg.params.state) {
+            $("serverState").textContent = String(msg.params.state);
+          }
+          return;
+        }
+
+        logLine(`[rx] ${JSON.stringify(msg)}`);
+      }
+
+      $("btnConnect").addEventListener("click", () => {
+        const url = $("wsUrl").value.trim();
+        if (!url) return;
+
+        setConnState("CONNECTING");
+        setButtonsEnabled(false);
+        $("serverState").textContent = "(unknown)";
+
+        ws = new WebSocket(url);
+
+        ws.onopen = () => {
+          setConnState("CONNECTED");
+          setButtonsEnabled(true);
+          logLine(`[ws] connected: ${url}`);
+        };
+
+        ws.onmessage = (ev) => handleIncoming(ev.data);
+
+        ws.onerror = () => {
+          setConnState("ERROR");
+          logLine("[ws] error");
+        };
+
+        ws.onclose = () => {
+          setConnState("DISCONNECTED");
+          setButtonsEnabled(false);
+          logLine("[ws] closed");
+          ws = null;
+          // Reject all pending
+          for (const [id, entry] of pending.entries()) {
+            clearTimeout(entry.timeout);
+            entry.reject(new Error(`WS closed; pending id=${id}`));
+          }
+          pending.clear();
+        };
+      });
+
+      $("btnDisconnect").addEventListener("click", () => {
+        if (ws) ws.close();
+      });
+
+      $("btnPing").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("ping", {});
+          logLine(`[rpc] ping -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] ping error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnHello").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("hello", {});
+          logLine(`[rpc] hello -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] hello error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnRun").addEventListener("click", async () => {
+        try {
+          const script = $("script").value;
+          const mode = $("mode").value;
+          const res = await sendRpc("run_script", { script, mode });
+          logLine(`[rpc] run_script -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] run_script error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnRpcSend").addEventListener("click", async () => {
+        try {
+          const method = $("rpcMethod").value.trim();
+          const timeout = parseInt($("rpcTimeout").value.trim(), 10);
+          const rawParams = $("rpcParams").value;
+          if (!method) throw new Error("method is required");
+          let params = {};
+          if (rawParams && rawParams.trim()) {
+            params = JSON.parse(rawParams);
+          }
+          const res = await sendRpc(method, params, Number.isFinite(timeout) ? timeout : 8000);
+          logLine(`[rpc] ${method} -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] custom error: ${String(e && e.message ? e.message : e)}`);
+        }
+      });
+
+      // ---- Controllers ----
+      $("btnTempSet").addEventListener("click", async () => {
+        try {
+          const target_k = parseFloat($("tempTargetK").value);
+          const rateStr = $("tempRate").value.trim();
+          const params = { target_k };
+          if (rateStr) params.rate_k_per_min = parseFloat(rateStr);
+          const res = await sendRpc("temperature.set", params);
+          logLine(`[rpc] temperature.set -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] temperature.set error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnTempGet").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("temperature.get", {});
+          logLine(`[rpc] temperature.get -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] temperature.get error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnTempWait").addEventListener("click", async () => {
+        try {
+          const tolerance_k = parseFloat($("tempTol").value);
+          const duration_s = parseFloat($("tempDur").value);
+          const res = await sendRpc("temperature.wait_stable", { tolerance_k, duration_s });
+          logLine(`[rpc] temperature.wait_stable -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] temperature.wait_stable error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnFieldSet").addEventListener("click", async () => {
+        try {
+          const target_t = parseFloat($("fieldTargetT").value);
+          const rampStr = $("fieldRamp").value.trim();
+          const params = { target_t };
+          if (rampStr) params.ramp_t_per_s = parseFloat(rampStr);
+          const res = await sendRpc("field.set", params);
+          logLine(`[rpc] field.set -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] field.set error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnFieldGet").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("field.get", {});
+          logLine(`[rpc] field.get -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] field.get error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnThetaSet").addEventListener("click", async () => {
+        try {
+          const deg = parseFloat($("thetaDeg").value);
+          const res = await sendRpc("angle.theta.set", { deg });
+          logLine(`[rpc] angle.theta.set -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] angle.theta.set error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnThetaGet").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("angle.theta.get", {});
+          logLine(`[rpc] angle.theta.get -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] angle.theta.get error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnPhiSet").addEventListener("click", async () => {
+        try {
+          const deg = parseFloat($("phiDeg").value);
+          const res = await sendRpc("angle.phi.set", { deg });
+          logLine(`[rpc] angle.phi.set -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] angle.phi.set error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnPhiGet").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("angle.phi.get", {});
+          logLine(`[rpc] angle.phi.get -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] angle.phi.get error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK2450SetSource").addEventListener("click", async () => {
+        try {
+          const mode = $("k2450Mode").value;
+          const level = parseFloat($("k2450Level").value);
+          const res = await sendRpc("keithley2450.set_source", { mode, level });
+          logLine(`[rpc] keithley2450.set_source -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley2450.set_source error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK2450Measure").addEventListener("click", async () => {
+        try {
+          const what = $("k2450What").value.trim() || "iv";
+          const res = await sendRpc("keithley2450.measure", { what });
+          logLine(`[rpc] keithley2450.measure -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley2450.measure error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK6221SetCurrent").addEventListener("click", async () => {
+        try {
+          const current_a = parseFloat($("k6221Current").value);
+          const res = await sendRpc("keithley6221.set_current", { current_a });
+          logLine(`[rpc] keithley6221.set_current -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley6221.set_current error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK6221Pulse").addEventListener("click", async () => {
+        try {
+          const current_a = parseFloat($("k6221Current").value);
+          const width_s = parseFloat($("k6221Width").value);
+          const res = await sendRpc("keithley6221.pulse_current", { current_a, width_s });
+          logLine(`[rpc] keithley6221.pulse_current -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley6221.pulse_current error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK2182ReadV").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley2182.read_voltage", {});
+          logLine(`[rpc] keithley2182.read_voltage -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley2182.read_voltage error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      // ---- Added: Keithley 6514 ----
+      $("btnK6514Idn").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley6514.idn", {});
+          logLine(`[rpc] keithley6514.idn -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley6514.idn error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK6514Refresh").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley6514.refresh_status", {});
+          logLine(`[rpc] keithley6514.refresh_status -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley6514.refresh_status error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK6514Read").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley6514.read_measurement", {});
+          logLine(`[rpc] keithley6514.read_measurement -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley6514.read_measurement error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK6514SetFunc").addEventListener("click", async () => {
+        try {
+          const func = $("k6514Func").value;
+          const res = await sendRpc("keithley6514.set_function", { func });
+          logLine(`[rpc] keithley6514.set_function -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley6514.set_function error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      // ---- Added: SR830 ----
+      $("btnSr830Idn").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("sr830.idn", {});
+          logLine(`[rpc] sr830.idn -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.idn error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830Refresh").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("sr830.refresh_status", {});
+          logLine(`[rpc] sr830.refresh_status -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.refresh_status error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830Read").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("sr830.read_output", {});
+          logLine(`[rpc] sr830.read_output -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.read_output error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830ConfigureRef").addEventListener("click", async () => {
+        try {
+          const source = $("sr830RefSource").value;
+          const frequency = parseFloat($("sr830Frequency").value);
+          const phase = parseFloat($("sr830Phase").value);
+          const harmonic = parseInt($("sr830Harmonic").value, 10);
+          const amplitude = parseFloat($("sr830Amplitude").value);
+          const res = await sendRpc("sr830.configure_ref", { source, frequency, phase, harmonic, amplitude });
+          logLine(`[rpc] sr830.configure_ref -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.configure_ref error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetInputConfig").addEventListener("click", async () => {
+        try {
+          const mode = $("sr830InputConfig").value;
+          const res = await sendRpc("sr830.set_input_config", { mode });
+          logLine(`[rpc] sr830.set_input_config -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_input_config error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetTimeConstant").addEventListener("click", async () => {
+        try {
+          const value = parseFloat($("sr830TimeConstant").value);
+          const res = await sendRpc("sr830.set_time_constant", { value });
+          logLine(`[rpc] sr830.set_time_constant -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_time_constant error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetFilterSlope").addEventListener("click", async () => {
+        try {
+          const slope = parseInt($("sr830FilterSlope").value, 10);
+          const res = await sendRpc("sr830.set_filter_slope", { slope });
+          logLine(`[rpc] sr830.set_filter_slope -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_filter_slope error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetReserveMode").addEventListener("click", async () => {
+        try {
+          const mode = $("sr830ReserveMode").value;
+          const res = await sendRpc("sr830.set_reserve_mode", { mode });
+          logLine(`[rpc] sr830.set_reserve_mode -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_reserve_mode error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetNotchFilter").addEventListener("click", async () => {
+        try {
+          const mode = $("sr830NotchFilter").value;
+          const res = await sendRpc("sr830.set_notch_filter", { mode });
+          logLine(`[rpc] sr830.set_notch_filter -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_notch_filter error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetSyncFilter").addEventListener("click", async () => {
+        try {
+          const mode = $("sr830SyncFilter").value;
+          const res = await sendRpc("sr830.set_sync_filter", { mode });
+          logLine(`[rpc] sr830.set_sync_filter -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_sync_filter error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetSensitivity").addEventListener("click", async () => {
+        try {
+          const value = parseFloat($("sr830Sensitivity").value);
+          const res = await sendRpc("sr830.set_sensitivity", { value });
+          logLine(`[rpc] sr830.set_sensitivity -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_sensitivity error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetInputGrounding").addEventListener("click", async () => {
+        try {
+          const mode = $("sr830InputGrounding").value;
+          const res = await sendRpc("sr830.set_input_grounding", { mode });
+          logLine(`[rpc] sr830.set_input_grounding -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_input_grounding error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetInputCoupling").addEventListener("click", async () => {
+        try {
+          const mode = $("sr830InputCoupling").value;
+          const res = await sendRpc("sr830.set_input_coupling", { mode });
+          logLine(`[rpc] sr830.set_input_coupling -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_input_coupling error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830SetChannelDisplays").addEventListener("click", async () => {
+        try {
+          const ch1 = $("sr830Ch1Display").value;
+          const ch2 = $("sr830Ch2Display").value;
+          const res = await sendRpc("sr830.set_channel_displays", { ch1, ch2 });
+          logLine(`[rpc] sr830.set_channel_displays -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.set_channel_displays error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830AutoGain").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("sr830.auto_gain", {});
+          logLine(`[rpc] sr830.auto_gain -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.auto_gain error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830AutoReserve").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("sr830.auto_reserve", {});
+          logLine(`[rpc] sr830.auto_reserve -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.auto_reserve error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnSr830AutoPhase").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("sr830.auto_phase", {});
+          logLine(`[rpc] sr830.auto_phase -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] sr830.auto_phase error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      // ---- Added: Keithley 3706 ----
+      $("btnK3706Idn").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley3706.idn", {});
+          logLine(`[rpc] keithley3706.idn -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.idn error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706Refresh").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley3706.refresh_status", {});
+          logLine(`[rpc] keithley3706.refresh_status -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.refresh_status error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706Open").addEventListener("click", async () => {
+        try {
+          const channelList = $("k3706ChannelList").value.trim();
+          const res = await sendRpc("keithley3706.open_channel", { channelList });
+          logLine(`[rpc] keithley3706.open_channel -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.open_channel error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706Close").addEventListener("click", async () => {
+        try {
+          const channelList = $("k3706ChannelList").value.trim();
+          const res = await sendRpc("keithley3706.close_channel", { channelList });
+          logLine(`[rpc] keithley3706.close_channel -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.close_channel error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706GetClosed").addEventListener("click", async () => {
+        try {
+          const specifier = $("k3706Specifier").value.trim();
+          const res = await sendRpc("keithley3706.get_closed", { specifier });
+          logLine(`[rpc] keithley3706.get_closed -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.get_closed error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706GetCards").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley3706.get_switch_cards", {});
+          logLine(`[rpc] keithley3706.get_switch_cards -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.get_switch_cards error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706GetAll").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("keithley3706.get_all_channels", {});
+          logLine(`[rpc] keithley3706.get_all_channels -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.get_all_channels error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnK3706LoadScript").addEventListener("click", async () => {
+        try {
+          const scriptContent = $("k3706Script").value || "";
+          const res = await sendRpc("keithley3706.load_script", { scriptContent });
+          logLine(`[rpc] keithley3706.load_script -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] keithley3706.load_script error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnPause").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("pause", {});
+          logLine(`[rpc] pause -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] pause error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnResume").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("resume", {});
+          logLine(`[rpc] resume -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] resume error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnAbort").addEventListener("click", async () => {
+        try {
+          const res = await sendRpc("abort", {});
+          logLine(`[rpc] abort -> ${JSON.stringify(res)}`);
+        } catch (e) {
+          logLine(`[rpc] abort error: ${JSON.stringify(e)}`);
+        }
+      });
+
+      $("btnClear").addEventListener("click", () => {
+        $("log").value = "";
+      });
+
+      // Initial UI
+      setConnState("DISCONNECTED");
+      setButtonsEnabled(false);
+    </script>
+  </body>
+</html>
